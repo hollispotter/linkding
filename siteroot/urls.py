@@ -18,19 +18,22 @@ from django.urls import path, include
 
 from bookmarks.admin import linkding_admin_site
 from .settings import ALLOW_REGISTRATION, DEBUG
+import os, re
+
+route_root = re.sub('^\/', '', os.environ.get("LD_CONTEXT_PATH", ''))
 
 urlpatterns = [
-    path('admin/', linkding_admin_site.urls),
-    path('login/', auth_views.LoginView.as_view(redirect_authenticated_user=True,
+    path(route_root + '/admin/', linkding_admin_site.urls),
+    path(route_root  + '/login/', auth_views.LoginView.as_view(redirect_authenticated_user=True,
                                                 extra_context=dict(allow_registration=ALLOW_REGISTRATION)),
          name='login'),
-    path('logout/', auth_views.LogoutView.as_view(), name='logout'),
-    path('', include('bookmarks.urls')),
+    path(route_root  + '/logout/', auth_views.LogoutView.as_view(), name='logout'),
+    path(route_root + '/', include('bookmarks.urls')),
 ]
 
 if DEBUG:
     import debug_toolbar
-    urlpatterns.append(path('__debug__/', include(debug_toolbar.urls)))
+    urlpatterns.append(path(route_root  + '/__debug__/', include(debug_toolbar.urls)))
 
 if ALLOW_REGISTRATION:
-    urlpatterns.append(path('', include('django_registration.backends.one_step.urls')))
+    urlpatterns.append(path(route_root , include('django_registration.backends.one_step.urls')))
